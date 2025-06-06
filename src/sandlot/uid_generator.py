@@ -1,8 +1,7 @@
 from functools import cache
-from pattern_handler import PatternHandler
 from collections.abc import Callable
 
-__all__ = ["generate_id"]
+__all__ = ["generate_uid"]
 
 VOWELS = frozenset("AEIOUY")
 
@@ -31,7 +30,9 @@ def _select_chars(non_vowels, vowels, chars_needed: int) -> str:
     selected_chars = non_vowels[:chars_needed]
     vowel_count = max(0, chars_needed - len(selected_chars))
     selected_chars += vowels[:vowel_count]
-    ordered_chars = "".join(char for _, char in sorted(selected_chars, key=lambda x: x[0]))
+    ordered_chars = "".join(
+        char for _, char in sorted(selected_chars, key=lambda x: x[0])
+    )
     return ordered_chars
 
 
@@ -53,12 +54,12 @@ def _build_player_uid(name: str) -> str:
     return f"player={suffix}"
 
 
-
 # Dispatch map
 _uid_builders: dict[str, Callable[[str], str]] = {
-    "team": _build_team_id,
-    "player": _build_player_id,
+    "team": _build_team_uid,
+    "player": _build_player_uid,
 }
+
 
 @cache
 def generate_uid(value: str, entity: str) -> str:
