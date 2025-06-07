@@ -2,7 +2,7 @@ import re
 from collections.abc import Callable, Iterable
 from functools import cache, cached_property
 
-from pattern_registry import PatternRegistry
+from pattern_store import PatternStore
 
 
 class PatternHandler:
@@ -10,24 +10,26 @@ class PatternHandler:
         self.pattern_key = pattern_key
 
     def findall(self, text: str, flags: int = 0) -> list[str]:
-        rx = PatternRegistry.get(self.pattern_key, flags)
+        rx = PatternStore.get(self.pattern_key, flags)
         return rx.findall(text)
 
     def search(self, text: str, flags: int = 0) -> re.Match[str] | None:
-        rx = PatternRegistry.get(self.pattern_key, flags)
+        rx = PatternStore.get(self.pattern_key, flags)
         return rx.search(text)
 
     def finditer(self, text: str, flags: int = 0) -> Iterable[re.Match[str]]:
-        rx = PatternRegistry.get(self.pattern_key, flags)
+        rx = PatternStore.get(self.pattern_key, flags)
         return rx.finditer(text)
 
-    def sub(self, repl: str | Callable[[re.Match], str], string: str, flags: int = 0) -> str:
-        rx = PatternRegistry.get(self.pattern_key, flags)
+    def sub(
+        self, repl: str | Callable[[re.Match], str], string: str, flags: int = 0
+    ) -> str:
+        rx = PatternStore.get(self.pattern_key, flags)
         return rx.sub(repl, string, flags)
 
     @cached_property
     def pattern(self):
-        return PatternRegistry.get(self.pattern_key)
+        return PatternStore.get(self.pattern_key)
 
 
 @cache
@@ -42,4 +44,3 @@ def compile_pattern(entity: str, use_boundaries: bool = True) -> re.Pattern:
     if use_boundaries:
         return re.compile(rf"\b{escaped}\b")
     return re.compile(escaped)
-

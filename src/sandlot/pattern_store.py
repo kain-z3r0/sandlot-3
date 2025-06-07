@@ -2,7 +2,7 @@ import re
 from functools import cache
 
 
-class PatternRegistry:
+class PatternStore:
     # =============== Team & Inning Regex ==============================
     _INNING_HALF = r"(?P<half>(?:Top|Bottom))"
     _INNING_NUM = r"(?P<num>\d)(?:st|nd|rd|th)"
@@ -91,7 +91,17 @@ class PatternRegistry:
         ]
     )
 
-    # =============== Class Data / Methods ============================
+
+    # ======================= Pitch Events ===========================
+    _PITCHES = "|".join(
+        [
+            r"Ball \d",
+            r"Strike \d (?:looking|swinging)",
+            r"Foul"
+        ]
+    )
+
+    # =============== Class Data / Methods ===========================
 
     _PATTERNS: dict[str, str] = {
         "players_ahead": _PLAYER_LOOKAHEAD,
