@@ -101,6 +101,14 @@ class PatternStore:
         ]
     )
 
+    # ======================= Positions ===========================
+    _POSITIONS = "|".join(
+        [
+            r"[Ll]eft fielder"
+        ]
+    )
+
+
     # =============== Class Data / Methods ===========================
 
     _PATTERNS: dict[str, str] = {

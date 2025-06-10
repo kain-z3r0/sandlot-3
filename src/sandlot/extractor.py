@@ -15,29 +15,34 @@ class Extractor:
     def extract_innings(self) -> tuple[str, ...]:
         return tuple(set(PatternHandler("inning_header").findall(self.text)))
 
+    def extract_teams(self) -> tuple[str, ...]:
+        return tuple(PatternHandler("team_info").findall(self.text))
+
     def extract_positions(self) -> tuple[str, ...]:
         pass
 
     def line_selector(self) -> tuple[str, ...]:
         return tuple(PatternHandler("filter").findall(self.text, re.MULTILINE))
 
-    def extract_all(self) -> dict[str, tuple[str, ...]]:
+    def extract(self) -> dict[str, tuple[str, ...]]:
         return {
             "players": self.extract_players(),
+            "team_info": self.extract_teams(),
             "innings": self.extract_innings(),
-            "remove": self.line_selector()
+            "filtered_lines": self.line_selector()
         }
 
 
 def rewriter(text: str) -> str:
-    
+    pass
 
 def main():
     filepath = Path(__file__).resolve().parents[2] / "simple_sample.txt"
 
     text = filepath.read_text()
-    info = Extractor(text).extract_all()
-    print(info)
+    info = Extractor(text).extract()
+    for key, values in info.items():
+        print(values)
     
 
 
