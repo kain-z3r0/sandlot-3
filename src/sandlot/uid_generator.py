@@ -97,7 +97,7 @@ def _build_team_uid(name: str) -> str:
     chars_needed = id_length - len(prefix)
     core_name = _select_chars(non_vowels, vowels, chars_needed)
     suffix = core_name.ljust(chars_needed, "X")
-    return f"team_at_bat={prefix}{suffix}"
+    return f"team_{prefix.lower()}{suffix.lower()}"
 
 
 def _build_player_uid(name: str) -> str:
@@ -114,7 +114,7 @@ def _build_player_uid(name: str) -> str:
     normalized_name = _normalize_name(name)
     core_name = normalized_name[:id_length]
     suffix = core_name.ljust(id_length, "X")
-    return f"player={suffix}"
+    return f"player_{suffix.lower()}"
 
 
 _uid_builders: dict[str, Callable[[str], str]] = {

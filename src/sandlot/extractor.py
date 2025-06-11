@@ -29,7 +29,8 @@ class Extractor:
             "players": self.extract_players(),
             "team_info": self.extract_teams(),
             "innings": self.extract_innings(),
-            "filtered_lines": self.line_selector()
+            "filtered_lines": self.line_selector(),
+            "positions": self.extract_positions()
         }
 
 
