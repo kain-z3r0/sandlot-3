@@ -23,7 +23,7 @@ def _normalize_name(name: str) -> str:
     Returns:
         A normalized uppercase string with only letters and digits.
     """
-    return "".join(char.upper() for char in name if char.isalnum())
+    return "".join(char.lower() for char in name if char.isalnum())
 
 
 def _normalize_split_name(name: str) -> tuple[str, str]:
@@ -75,9 +75,7 @@ def _select_chars(non_vowels, vowels, chars_needed: int) -> str:
     selected_chars = non_vowels[:chars_needed]
     vowel_count = max(0, chars_needed - len(selected_chars))
     selected_chars += vowels[:vowel_count]
-    ordered_chars = "".join(
-        char for _, char in sorted(selected_chars, key=lambda x: x[0])
-    )
+    ordered_chars = "".join(char for _, char in sorted(selected_chars, key=lambda x: x[0]))
     return ordered_chars
 
 
@@ -96,8 +94,8 @@ def _build_team_uid(name: str) -> str:
     non_vowels, vowels = _split_chars_by_vowel_type(remaining_chars)
     chars_needed = id_length - len(prefix)
     core_name = _select_chars(non_vowels, vowels, chars_needed)
-    suffix = core_name.ljust(chars_needed, "X")
-    return f"team_{prefix.lower()}{suffix.lower()}"
+    suffix = core_name.ljust(chars_needed, "x")
+    return f"team_{prefix}{suffix}"
 
 
 def _build_player_uid(name: str) -> str:
@@ -113,8 +111,8 @@ def _build_player_uid(name: str) -> str:
     id_length: int = 7
     normalized_name = _normalize_name(name)
     core_name = normalized_name[:id_length]
-    suffix = core_name.ljust(id_length, "X")
-    return f"player_{suffix.lower()}"
+    suffix = core_name.ljust(id_length, "x")
+    return f"player_{suffix}"
 
 
 _uid_builders: dict[str, Callable[[str], str]] = {

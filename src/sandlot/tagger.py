@@ -7,6 +7,7 @@ from pattern_handler import compile_pattern
 import re
 from uid_generator import generate_uid
 from functools import partial
+from itertools import count
 
 class Metadata(TypedDict):
     players: tuple[str, ...]
@@ -32,13 +33,19 @@ def inning_tagger(inning_info: str) -> str:
 def position_tagger(positions: str) -> str:
     pass
 
+def filter_lines(filtered_lines: str) -> str:
+    return ""
+
 map_builder: dict[str: Callable[[str], str ] | None] = {
     "players": partial(generate_uid, entity="player"),
-    "filtered_lines": None,
-    "team_info": None,
+    "filtered_lines": filter_lines,
+    "team_info": partial(generate_uid, entity="team"),
     "innings": inning_tagger, 
     "positions": None
 }
+
+ABID_FILE = Path("atbat_ids.txt")
+
 
 def mapper(metadata: Metadata) -> MappedData:
     keys = metadata.keys()
@@ -51,15 +58,61 @@ def mapper(metadata: Metadata) -> MappedData:
 
     return mapping
 
+def get_atbat_id() -> str:
+    ab_counter_file = Path("atbat_counter_ids.txt")
 
-def rewriter(text: str, mapping: MappedData) -> str:
+    if ab_counter_file.is_file():
+        current = int(ab_counter_file.read_text().strip())
+    else:
+        current = 0
 
-    for entity in mapping.keys():
-        for key, value in mapping[entity].items():
-            pattern = compile_pattern(key)
-            text = pattern.sub(value, text)
+    current += 1
+    ab_counter_file.write_text(str(current))
 
-    return text
+    return f"{current:09d}"
+
+def replacer(text: str, mapping: MappedData) -> str:
+    for entry, replacements in mapping.items():
+        for entity, replacement in replacements.items():
+            entire_line = (entry == "filtered_lines")
+            pattern = compile_pattern(entity, use_boundaries=not entire_line, entire_line=entire_line)
+            text = pattern.sub(replacement, text)
+
+    lines = [line for line in text.splitlines() if line.strip()]
+    return "\n".join(lines)
+
+def rewriter(text: str) -> str:
+    updated_text = [
+        f"entry=atbat, {line}" if not line.startswith("entry=inning") else line 
+        for line in text.splitlines() 
+    ]
+    return "\n".join(updated_text)
+
+from itertools import zip_longest
+
+def add_abid(text: str) -> str:
+    lines = text.splitlines()
+    result = []
+
+    # Extract non-inning lines for tagging
+    taggable = [line for line in lines if not line.startswith("entry=inning")]
+    tagged_map = {}
+
+    # Assign abid in pairs
+    for line1, line2 in zip_longest(*[iter(taggable)]*2, fillvalue=None):
+        abid = get_atbat_id()
+        if line1:
+            tagged_map[line1] = f"entry=atbat_events, abid={abid}" + line1.removeprefix("entry=atbat").lstrip()
+        if line2:
+            tagged_map[line2] = f"entry=atbat_outcome, abid={abid}" + line2.removeprefix("entry=atbat").lstrip()
+
+
+    # Rebuild in original order
+    for line in lines:
+        result.append(tagged_map.get(line, line))
+
+    return "\n".join(result)
+
 
 
 
@@ -72,12 +125,10 @@ def main():
 
     data = mapper(metadata)
 
-    for entity in data.values():
-        print(entity)
-    new_text = rewriter(text, data)
-
-
-    #print(new_text)
+    new_text = replacer(text, data)
+    u_text = rewriter(new_text)
+    n_text = add_abid(u_text)
+    print(n_text)
 
 if __name__ == "__main__":
     main()
