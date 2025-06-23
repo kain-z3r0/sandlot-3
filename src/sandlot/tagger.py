@@ -116,6 +116,47 @@ def add_abid(text: str) -> str:
 
 
 
+
+sample_text = (
+    "entry=atbat_events, abid=000000128, Score changed to 10-7, Ball 1, Strike 1 looking, Ball 2," 
+    " Foul, Foul, Strike 3 looking."
+)
+
+def pitch_counter(text: str) -> str:
+    result = []
+    ball_pattern = re.compile(r"(?P<balls>, Ball [1-4])")
+    strike_pattern = re.compile(r"(?P<strikes>), Strike [1-3]\b(?:\s+\w+)*)")
+    foul_pattern = re.compile(r"(?P<fouls>Foul)")
+    # ball_pattern = r"(?P<balls>, Ball [1-4])"
+    # strike_pattern = r"(?P<strikes>, Strike [1-3]\b(?:\s+\w+)*)"
+    # foul_pattern = r"(?P<fouls>Foul)"
+    # pc_regex = re.compile(rf"{ball_pattern}|{strike_pattern}|{foul_pattern}")
+    lines = text.splitlines()
+
+    for line in lines:
+        if not line.startswith("entry=atbat_events"):
+            result.append(line)
+            continue
+
+        events = line.split(",")
+        for event in events:
+            
+
+            print(f"{balls=}: {strikes=}")
+
+
+        updated_line = ball_pattern.sub("", line).replace(".", "")
+        updated_line = strike_pattern.sub("", updated_line)
+        updated_line = f"{updated_line}, pitch_count={balls}-{strikes}"
+        result.append(updated_line)
+
+    return "\n".join(result)
+
+
+
+
+
+
 def main():
     filepath = Path(__file__).resolve().parents[2] / "simple_sample.txt"
     text = filepath.read_text()
@@ -128,7 +169,9 @@ def main():
     new_text = replacer(text, data)
     u_text = rewriter(new_text)
     n_text = add_abid(u_text)
-    print(n_text)
+    t = pitch_counter(sample_text)
+    print(t)
+
 
 if __name__ == "__main__":
     main()
