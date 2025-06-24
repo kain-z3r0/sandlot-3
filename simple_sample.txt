@@ -70,3 +70,37 @@ B C walks, A Avitia pitching, Z E remains at 3rd.
 Walk
 Ball 1, B C steals 2nd, Ball 2, Ball 3, Strike 1 looking, Strike 2 looking, Ball 4.
 T M walks, A Avitia pitching, Z E remains at 3rd, B C remains at 2nd.
+Double
+AZBC 9 - JGBD 6
+M W steals 2nd, M W steals 3rd, Ball 1, M W scores on steal of home, Ball 2, In play.
+Z E doubles on a line drive to right fielder X Perez.
+Top 1st - JGB Diamond Kollective 9U
+Single
+Lineup changed: T M in at pitcher, Ball 1, Ball 2, In play.
+A Gutwein singles on a ground ball to pitcher T M.
+Ground Out
+1 Out
+Ball 1, In play.
+A Avitia grounds out, shortstop to first baseman, A Gutwein advances to 2nd.
+Double
+JGBD 1 - AZBC 0
+Ball 1, In play.
+J Martinez doubles on a fly ball to center fielder, A Gutwein scores.
+Single
+In play.
+C Farmer singles on a hard ground ball to second baseman, J Martinez advances to 3rd.
+Single
+JGBD 3 - AZBC 0
+Ball 1, J Martinez scores on passed ball, In play.
+G Francis singles on a ground ball to center fielder, C Farmer scores.
+Single
+In play.
+J Brooks singles on a line drive to left fielder, G Francis advances to 2nd.
+Single
+JGBD 4 - AZBC 0
+Ball 1, G Francis advances to 3rd on passed ball, J Brooks steals 2nd, In play.
+Julian singles on a fly ball to shortstop, G Francis scores, J Brooks advances to 3rd.
+Inning Ended
+3 Outs
+Half-inning ended by scorekeeper.
+Bottom 1st - AZBC 2034 Frisby 9U
