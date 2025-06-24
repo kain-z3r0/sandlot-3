@@ -104,3 +104,20 @@ Inning Ended
 3 Outs
 Half-inning ended by scorekeeper.
 Bottom 1st - AZBC 2034 Frisby 9U
+Single
+Lineup changed: A Gutwein in at pitcher, In play.
+M W singles on a line drive to center fielder C Farmer.
+Error
+In play.
+R S hits a hard ground ball and reaches on an error by shortstop G Francis, M W advances to 2nd.
+Walk
+Ball 1, Ball 2, Ball 3, Ball 4.
+B E walks, A Gutwein pitching, M W advances to 3rd, R S advances to 2nd.
+Strikeout
+1 Out
+Ball 1, Ball 2, Strike 1 looking, Foul, Strike 3 looking.
+L F strikes out looking, A Gutwein pitching, M W remains at 3rd, R S remains at 2nd, B E remains at 1st.
+Strikeout
+2 Outs
+Strike 1 swinging, Ball 1, Foul, Ball 2, Foul, Strike 3 swinging.
+O B strikes out swinging, A Gutwein pitching, M W remains at 3rd, R S remains at 2nd, B E remains at 1st.
