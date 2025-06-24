@@ -91,23 +91,11 @@ class PatternStore:
         ]
     )
 
-
     # ======================= Pitch Events ===========================
-    _PITCHES = "|".join(
-        [
-            r"Ball \d",
-            r"Strike \d (?:looking|swinging)",
-            r"Foul"
-        ]
-    )
+    _PITCHES = "|".join([r"Ball \d", r"Strike \d (?:looking|swinging)", r"Foul"])
 
     # ======================= Positions ===========================
-    _POSITIONS = "|".join(
-        [
-            r"[Ll]eft fielder"
-        ]
-    )
-
+    _POSITIONS = "|".join([r"[Ll]eft fielder"])
 
     # =============== Class Data / Methods ===========================
 

@@ -39,7 +39,9 @@ def compile_entity_pattern(entities: tuple[str]) -> re.Pattern:
 
 
 @cache
-def compile_pattern(entity: str, use_boundaries: bool = True, entire_line: bool = False) -> re.Pattern:
+def compile_pattern(
+    entity: str, use_boundaries: bool = True, entire_line: bool = False
+) -> re.Pattern:
     escaped = re.escape(entity)
     if use_boundaries:
         return re.compile(rf"\b{escaped}\b")

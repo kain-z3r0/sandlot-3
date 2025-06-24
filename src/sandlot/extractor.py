@@ -30,12 +30,13 @@ class Extractor:
             "team_info": self.extract_teams(),
             "innings": self.extract_innings(),
             "filtered_lines": self.line_selector(),
-            "positions": self.extract_positions()
+            "positions": self.extract_positions(),
         }
 
 
 def rewriter(text: str) -> str:
     pass
+
 
 def main():
     filepath = Path(__file__).resolve().parents[2] / "simple_sample.txt"
@@ -44,7 +45,6 @@ def main():
     info = Extractor(text).extract()
     for key, values in info.items():
         print(values)
-    
 
 
 if __name__ == "__main__":
