@@ -99,34 +99,31 @@ def rewriter(text: str) -> str:
 
 from itertools import zip_longest
 
-
 def add_abid(text: str) -> str:
     lines = text.splitlines()
     result = []
 
-    # Extract non-inning lines for tagging
-    taggable = [line for line in lines if not line.startswith("entry=inning")]
-    tagged_map = {}
+    # Track taggable lines with their original index
+    taggable = [(i, line) for i, line in enumerate(lines) if line.startswith("entry=atbat")]
+    replacements = {}
 
-    # Assign abid in pairs
-    for line1, line2 in zip_longest(*[iter(taggable)] * 2, fillvalue=None):
+    # Safely pair them with a fill value
+    pairs = zip_longest(*[iter(taggable)] * 2, fillvalue=(None, None))
+
+    for (i1, line1), (i2, line2) in pairs:
         abid = get_atbat_id()
         if line1:
-            tagged_map[line1] = (
-                f"entry=atbat_events, abid={abid}"
-                + line1.removeprefix("entry=atbat").lstrip()
-            )
+            replacements[i1] = f"entry=atbat_events, abid={abid}, " + line1.removeprefix("entry=atbat").lstrip(", ")
         if line2:
-            tagged_map[line2] = (
-                f"entry=atbat_outcome, abid={abid}"
-                + line2.removeprefix("entry=atbat").lstrip()
-            )
+            replacements[i2] = f"entry=atbat_outcome, abid={abid}, " + line2.removeprefix("entry=atbat").lstrip(", ")
 
-    # Rebuild in original order
-    for line in lines:
-        result.append(tagged_map.get(line, line))
+    # Rebuild output, preserving original order
+    for i, line in enumerate(lines):
+        result.append(replacements.get(i, line))
 
     return "\n".join(result)
+
+
 
 
 sample_text = (
@@ -186,36 +183,77 @@ def tag_batter(text: str) -> str:
 def tag_outcome(text: str) -> str:
     result = []
     lines = text.splitlines()
-    outcome_pattern = re.compile(r"batter=player_[a-z]{7} (?P<outcome>.*?)[,.]")
+    outcome_pattern = re.compile(r"batter=player_[a-z]{7}(?P<outcome>.*?)[,.]")
     for line in lines:
         if line.startswith("entry=atbat_outcome"):
             match = outcome_pattern.search(line)
-            print(match.group("outcome") if match is not None else "missing")
-            outcome = match.group("outcome") if match is not None else "missing"
-            updated_line = outcome_pattern.sub("", line) 
-            result.append(f"{updated_line}, outcome={outcome}")
+            outcome = match.group("outcome").strip() if match is not None else "missing"
+            updated_line = line.replace(outcome, f", ab_result={outcome}")
+            result.append(updated_line)
         else:
             result.append(line)
 
     return "\n".join(result)
+
+def in_play(text: str) -> str:
+    lines = text.splitlines()
+    result = []
+    for line in lines:
+        if not line.startswith("entry=atbat_events"):
+            result.append(line)
+            continue
+        updated_line = line.replace("In play", "outcome_type=battedball")
+        result.append(updated_line)
+
+    return "\n".join(result)
+
+
+def tag_defenders(text: str) -> str:
+    lines = text.splitlines()
+    result = []
+
+    for line in lines:
+        if line.startswith("entry=inning"):
+            result.append(line)
+            continue
+
+def find_positions(text: str) -> str:
+    lines = text.splitlines()
+    pos_pattern = re.compile(r"to (\w+(?:\s+\w+){0,2}) player_")
+    positions = set()
+
+    for line in lines:
+        if not line.startswith("entry=atbat_outcome"):
+            continue
+        pos = pos_pattern.findall(line)
+        positions.update(pos)
+    return positions
+
+
 
 
 
 def main():
     filepath = Path(__file__).resolve().parents[2] / "simple_sample.txt"
     text = filepath.read_text()
+    full_text_filepath = Path(__file__).resolve().parents[2] / "full_sample.txt"
+    full_text = full_text_filepath.read_text()
 
-    metadata = Extractor(text).extract()
+    metadata = Extractor(full_text).extract()
 
     data = mapper(metadata)
 
-    new_text = replacer(text, data)
+    new_text = replacer(full_text, data)
     u_text = rewriter(new_text)
     n_text = add_abid(u_text)
     t = pitch_counter(n_text)
     b = tag_batter(t)
     c = tag_outcome(b)
-    print(c)
+    d = in_play(c)
+    pos = find_positions(d)
+    # print("\n".join(n_text.splitlines()[:32]))
+    print(d)
+
 
 
 if __name__ == "__main__":
