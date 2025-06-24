@@ -88,18 +88,6 @@ def replacer(text: str, mapping: MappedData) -> str:
     lines = [line for line in text.splitlines() if line.strip()]
     return "\n".join(lines)
 
-def insert_outcome_after_inning_admin_closure(text: str) -> str:
-    lines = text.splitlines()
-
-    result = []
-
-    for line in lines:
-        result.append(line)
-        if line.startswith("Half-inning ended by"):
-            result.append("outcome=half_inning_ended, type=admin_event")
-
-    return "\n".join(result)
-
 
 def rewriter(text: str) -> str:
     updated_text = [
@@ -111,29 +99,41 @@ def rewriter(text: str) -> str:
 
 from itertools import zip_longest
 
+from itertools import zip_longest
+
 def add_abid(text: str) -> str:
     lines = text.splitlines()
     result = []
+    atbat_block = []
 
-    # Track taggable lines with their original index
-    taggable = [(i, line) for i, line in enumerate(lines) if line.startswith("entry=atbat")]
-    replacements = {}
+    for line in lines:
+        if line.startswith("entry=inning"):
+            result.extend(process_atbat_block(atbat_block))
+            atbat_block = []
+            result.append(line)
+        elif line.startswith("entry=atbat"):
+            atbat_block.append(line)
+        else:
+            result.extend(process_atbat_block(atbat_block))
+            atbat_block = []
+            result.append(line)
 
-    # Safely pair them with a fill value
-    pairs = zip_longest(*[iter(taggable)] * 2, fillvalue=(None, None))
-
-    for (i1, line1), (i2, line2) in pairs:
-        abid = get_atbat_id()
-        if line1:
-            replacements[i1] = f"entry=atbat_events, abid={abid}, " + line1.removeprefix("entry=atbat").lstrip(", ")
-        if line2:
-            replacements[i2] = f"entry=atbat_outcome, abid={abid}, " + line2.removeprefix("entry=atbat").lstrip(", ")
-
-    # Rebuild output, preserving original order
-    for i, line in enumerate(lines):
-        result.append(replacements.get(i, line))
-
+    # Final block
+    result.extend(process_atbat_block(atbat_block))
     return "\n".join(result)
+
+def process_atbat_block(lines: list[str]) -> list[str]:
+    output = []
+    for l1, l2 in zip_longest(*[iter(lines)] * 2):
+        abid = get_atbat_id()
+        if l1:
+            entry = l1.removeprefix("entry=atbat").lstrip(", ")
+            output.append(f"entry=atbat_events, abid={abid}, {entry}")
+        if l2:
+            entry = l2.removeprefix("entry=atbat").lstrip(", ")
+            output.append(f"entry=atbat_outcome, abid={abid}, {entry}")
+    return output
+
 
 
 
@@ -242,6 +242,21 @@ def find_positions(text: str) -> str:
     return positions
 
 
+POSITIONS = {
+    'first baseman', 'pitcher', 'second baseman', 'center fielder',
+    'left fielder', 'shortstop', 'catcher', 'third baseman', 'right fielder'
+}
+
+def tag_defenders(text: str):
+
+    lines = text.splitlines()
+    pattern = re.compile(r"\b")
+    for line in lines:
+        if line.startswith("entry=inning"):
+            result.append(line)
+            continue
+
+                                                                        
 
 
 
@@ -252,22 +267,19 @@ def main():
     full_text_filepath = Path(__file__).resolve().parents[2] / "full_sample.txt"
     full_text = full_text_filepath.read_text()
 
-    metadata = Extractor(text).extract()
+    metadata = Extractor(full_text).extract()
 
     data = mapper(metadata)
 
-    new_text = replacer(text, data)
-    e = insert_outcome_after_inning_admin_closure(new_text)
-    u_text = rewriter(e)
+    new_text = replacer(full_text, data)
+    u_text = rewriter(new_text)
     n_text = add_abid(u_text)
     t = pitch_counter(n_text)
     b = tag_batter(t)
     c = tag_outcome(b)
     d = in_play(c)
     pos = find_positions(d)
-    # print("\n".join(n_text.splitlines()[:32]))
-    #print(d)
-    print(d)
+    print(pos)
 
 
 
