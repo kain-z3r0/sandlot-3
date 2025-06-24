@@ -88,6 +88,18 @@ def replacer(text: str, mapping: MappedData) -> str:
     lines = [line for line in text.splitlines() if line.strip()]
     return "\n".join(lines)
 
+def insert_outcome_after_inning_admin_closure(text: str) -> str:
+    lines = text.splitlines()
+
+    result = []
+
+    for line in lines:
+        result.append(line)
+        if line.startswith("Half-inning ended by"):
+            result.append("outcome=half_inning_ended, type=admin_event")
+
+    return "\n".join(result)
+
 
 def rewriter(text: str) -> str:
     updated_text = [
@@ -233,18 +245,20 @@ def find_positions(text: str) -> str:
 
 
 
+
 def main():
     filepath = Path(__file__).resolve().parents[2] / "simple_sample.txt"
     text = filepath.read_text()
     full_text_filepath = Path(__file__).resolve().parents[2] / "full_sample.txt"
     full_text = full_text_filepath.read_text()
 
-    metadata = Extractor(full_text).extract()
+    metadata = Extractor(text).extract()
 
     data = mapper(metadata)
 
-    new_text = replacer(full_text, data)
-    u_text = rewriter(new_text)
+    new_text = replacer(text, data)
+    e = insert_outcome_after_inning_admin_closure(new_text)
+    u_text = rewriter(e)
     n_text = add_abid(u_text)
     t = pitch_counter(n_text)
     b = tag_batter(t)
@@ -252,6 +266,7 @@ def main():
     d = in_play(c)
     pos = find_positions(d)
     # print("\n".join(n_text.splitlines()[:32]))
+    #print(d)
     print(d)
 
 
