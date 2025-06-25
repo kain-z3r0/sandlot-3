@@ -75,7 +75,7 @@
   ab_result=hit_by_pitch, event_type=hbp,
   outs_recorded=0, is_pa=true, is_ab=false, ab_description=is hit by pitch
 "walks": >
-  ab_result=walk, event_type=walk,
+  ab_result=walk, event_type=non_contact,
   outs_recorded=0, is_pa=true, is_ab=false, ab_description=walks
 
 #------------------------------------------------------------------------------

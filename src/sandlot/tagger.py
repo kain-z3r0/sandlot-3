@@ -421,6 +421,99 @@ def tag_ab_events(text: str) -> str:
     return "\n".join(out_lines)
 
 
+def tag_admin_events(text):
+    pass
+
+import re
+
+import re
+
+import re
+
+import re
+
+import re
+
+import re
+
+def tag_pitchers(text: str) -> str:
+    sub_pattern = re.compile(r"Lineup changed: (player_\w{7}) in at pitcher")
+    pitching_pattern = re.compile(r"(player_\w{7}) pitching")
+    pitcher_tagged_pattern = re.compile(r"pitcher=player_\w{7}")
+    inning_pattern = re.compile(r"entry=inning, half=(top|bottom), number=(\d+)")
+
+    top_pitcher = None
+    bottom_pitcher = None
+    current_half = None
+    result = []
+
+    for line in text.splitlines():
+        # Detect inning line and capture current half
+        inning_match = inning_pattern.match(line)
+        if inning_match:
+            current_half = inning_match.group(1)  # 'top' or 'bottom'
+
+        # Detect substitution and remove it
+        sub_match = sub_pattern.search(line)
+        if sub_match:
+            pitcher = sub_match.group(1)
+            if current_half == "top":
+                top_pitcher = pitcher
+            elif current_half == "bottom":
+                bottom_pitcher = pitcher
+            line = sub_pattern.sub("", line).strip(", ").strip()
+
+        # Detect inline 'pitching'
+        pitch_match = pitching_pattern.search(line)
+        if pitch_match:
+            pitcher = pitch_match.group(1)
+            if current_half == "top":
+                top_pitcher = pitcher
+            elif current_half == "bottom":
+                bottom_pitcher = pitcher
+
+        # Tag only atbat_outcome lines
+        if line.startswith("entry=atbat_outcome") and not pitcher_tagged_pattern.search(line):
+            if current_half == "top":
+                line += f", pitcher={top_pitcher or 'unknown'}"
+            elif current_half == "bottom":
+                line += f", pitcher={bottom_pitcher or 'unknown'}"
+
+        result.append(line)
+
+    return "\n".join(result)
+
+
+
+
+
+
+
+
+
+
+def deduplicate_atbat_events(text: str) -> str:
+    return "\n".join(
+        ", ".join(
+            dict.fromkeys(
+                part.strip() for part in line.split(",")
+            )
+        )
+        for line in text.splitlines()
+    )
+
+
+
+# def delete_duplicate_events(text: str) -> str:
+#     cleaned_lines = []
+
+#     for line in text.splitlines():
+#         parts = (part.strip() for part in line.split(","))
+#         unique = dict.fromkeys(parts)          # keeps first-seen order
+#         cleaned_lines.append(", ".join(unique))
+
+#     return "\n".join(cleaned_lines)
+
 
 
 
@@ -460,7 +553,10 @@ POS_MAP = {
 }
 
 pattern_field = re.compile(
-    r"\b(?P<pos1>pitcher|catcher|first baseman|second baseman|third baseman|shortstop|left fielder|center fielder|right fielder) player_\w+ to (?P<pos2>pitcher|catcher|first baseman|second baseman|third baseman|shortstop|left fielder|center fielder|right fielder) player_\w+"
+    r"\b(?P<pos1>pitcher|catcher|first baseman|second baseman|third baseman|shortstop|"
+    r"left fielder|center fielder|right fielder) player_\w+ to (?P<pos2>pitcher|catcher|"
+    r"first baseman|second baseman|third baseman|shortstop|left fielder|center fielder|"
+    r"right fielder) player_\w+"
 )
 
 def replace_fielding(text: str) -> str:
@@ -478,24 +574,26 @@ def main():
     full_text_filepath = Path(__file__).resolve().parents[2] / "full_sample.txt"
     full_text = full_text_filepath.read_text()
 
-    metadata = Extractor(full_text).extract()
+    metadata = Extractor(text).extract()
 
     data = mapper(metadata)
 
-    new_text = replacer(full_text, data)
-    u_text = rewriter(new_text)
+    new_text = replacer(text, data)
+    keys = deduplicate_atbat_events(new_text)
+    u_text = rewriter(keys)
     n_text = add_abid(u_text)
     t = pitch_counter(n_text)
-    b = tag_batter(t)
+    y = tag_pitchers(t)
+    b = tag_batter(y)
     c = tag_outcome(b)
     d = in_play(c)
     # pos = find_positions(d)
     # out = get_outcome(d)
-
     h = fix_location_formatting(d)
     #j = replace_fielding(h)
     ii = tag_ab_events(h)
-    print(ii)
+    print(y)
+
     # print(h)
     # for o in out:
     #     print(o)
@@ -506,3 +604,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# TODO:
+# failing to tag up phrase fix
+# need to fix hit_loc, replacing fielding positions involved in fielding plays
