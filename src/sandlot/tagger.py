@@ -220,15 +220,6 @@ def in_play(text: str) -> str:
     return "\n".join(result)
 
 
-def tag_defenders(text: str) -> str:
-    lines = text.splitlines()
-    result = []
-
-    for line in lines:
-        if line.startswith("entry=inning"):
-            result.append(line)
-            continue
-
 def find_positions(text: str) -> str:
     lines = text.splitlines()
     pos_pattern = re.compile(r"to (\w+(?:\s+\w+){0,2}) player_")
@@ -247,14 +238,84 @@ POSITIONS = {
     'left fielder', 'shortstop', 'catcher', 'third baseman', 'right fielder'
 }
 
-def tag_defenders(text: str):
+def get_outcome(text):
 
     lines = text.splitlines()
-    pattern = re.compile(r"\b")
-    for line in lines:
-        if line.startswith("entry=inning"):
-            result.append(line)
-            continue
+    pattern = re.compile(r"ab_result=(?P<outcome>.*?)(?=,|player_)")
+
+    result = [
+        match.group("outcome") 
+        for line in lines 
+        if (match := pattern.search(line))
+    ]
+
+    return set(result)
+
+
+
+ab_result_map = {
+    # Hits
+    "singles": "single",
+    "doubles": "double",
+    "triples": "triple",
+    "homers": "homerun",
+    "hits an inside the park home run": "inside_the_park_homerun",
+
+    # Walk/HBP
+    "walks": "walk",
+    "is hit by pitch": "hit_by_pitch",
+
+    # Outs (single)
+    "grounds out": "groundout",
+    "flies out": "flyout",
+    "lines out": "lineout",
+    "pops out": "popup",
+    "out on infield fly": "infield_fly",
+    "out on sacrifice fly": "sacrifice_fly",
+    "is out on foul tip": "foul_tip_out",
+    "out (other)": "out_other",
+
+    # Outs (multiple)
+    "lines into a double play": "double_play",
+    "flies into a double play": "double_play",
+    "grounds into a double play": "double_play",
+    "grounds into a fielder's choice double play": "double_play",
+    "pops into a double play": "double_play",
+    "grounds into fielder's choice": "fielder_choice",
+
+    # Reaches on Error
+    "hits a ground ball and reaches on an error": "reaches_on_error_groundball",
+    "hits a fly ball and reaches on an error": "reaches_on_error_flyball",
+    "hits a line drive and reaches on an error": "reaches_on_error_linedrive",
+    "hits a hard ground ball and reaches on an error": "reaches_on_error_hard_groundball",
+    "reaches on dropped 3rd strike (wild pitch)": "reaches_on_error_dropped_third_strike",
+    "reaches on dropped 3rd strike (passed ball)": "reaches_on_error_dropped_third_strike",
+
+    # Strikeouts
+    "strikes out swinging": "strikeout_swinging",
+    "strikes out looking": "strikeout_looking",
+    "out at first on dropped 3rd strike": "strikeout_dropped_third",
+
+    # Sacrifice
+    "sacrifices": "sacrifice",
+}
+
+batted_type_map = {
+    "ground ball": "groundball",
+    "hard ground ball": "groundball",
+    "fly ball": "flyball",
+    "flies": "flyball",
+    "pop fly": "popup",
+    "line drive": "linedrive",
+    "lines": "linedrive",
+    "hard line drive": "linedrive",  # if this ever appears
+    "bunt": "bunt",
+}
+
+
+
+
+
 
                                                                         
 
@@ -279,7 +340,9 @@ def main():
     c = tag_outcome(b)
     d = in_play(c)
     pos = find_positions(d)
-    print(pos)
+    out = get_outcome(d)
+    for o in out:
+        print(o)
 
 
 
