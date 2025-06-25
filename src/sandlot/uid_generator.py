@@ -5,8 +5,8 @@ Provides functions to generate unique IDs for players and teams,
 tagged with 'PLAYER_' or 'TEAM_' prefixes.
 """
 
-from functools import cache
 from collections.abc import Callable
+from functools import cache
 
 __all__ = ["generate_uid"]
 
@@ -75,9 +75,7 @@ def _select_chars(non_vowels, vowels, chars_needed: int) -> str:
     selected_chars = non_vowels[:chars_needed]
     vowel_count = max(0, chars_needed - len(selected_chars))
     selected_chars += vowels[:vowel_count]
-    ordered_chars = "".join(
-        char for _, char in sorted(selected_chars, key=lambda x: x[0])
-    )
+    ordered_chars = "".join(char for _, char in sorted(selected_chars, key=lambda x: x[0]))
     return ordered_chars
 
 

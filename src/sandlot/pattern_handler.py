@@ -21,9 +21,7 @@ class PatternHandler:
         rx = PatternStore.get(self.pattern_key, flags)
         return rx.finditer(text)
 
-    def sub(
-        self, repl: str | Callable[[re.Match], str], string: str, flags: int = 0
-    ) -> str:
+    def sub(self, repl: str | Callable[[re.Match], str], string: str, flags: int = 0) -> str:
         rx = PatternStore.get(self.pattern_key, flags)
         return rx.sub(repl, string, flags)
 

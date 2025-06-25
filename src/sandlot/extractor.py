@@ -1,6 +1,7 @@
-from pattern_handler import PatternHandler
-from pathlib import Path
 import re
+from pathlib import Path
+
+from pattern_handler import PatternHandler
 
 
 class Extractor:
