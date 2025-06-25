@@ -256,66 +256,66 @@ def get_outcome(text):
 
 grouped_phrases = {
     # Singles
-    "singles on a bunt ": "ab_result=single, batted_type=bunt, play_type=battedball, outs_recorded=0",
-    "singles on a fly ball ": "ab_result=single, batted_type=flyball, play_type=battedball, outs_recorded=0",
-    "singles on a ground ball ": "ab_result=single, batted_type=groundball, play_type=battedball, outs_recorded=0",
-    "singles on a hard ground ball ": "ab_result=single, batted_type=groundball, play_type=battedball, batted_strength=hard, outs_recorded=0",
-    "singles on a line drive ": "ab_result=single, batted_type=linedrive, play_type=battedball, outs_recorded=0",
-    "singles on a pop fly ": "ab_result=single, batted_type=popup, play_type=battedball, outs_recorded=0",
+    "singles on a bunt ": "ab_result=single, event_type=hit, batted_type=bunt, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a bunt",
+    "singles on a fly ball ": "ab_result=single, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a fly ball",
+    "singles on a ground ball ": "ab_result=single, event_type=hit, batted_type=groundball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a ground ball",
+    "singles on a hard ground ball ": "ab_result=single, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a hard ground ball",
+    "singles on a line drive ": "ab_result=single, event_type=hit, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a line drive",
+    "singles on a pop fly ": "ab_result=single, event_type=hit, batted_type=popup, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a pop fly",
 
     # Doubles
-    "doubles on a fly ball ": "ab_result=double, batted_type=flyball, play_type=battedball, outs_recorded=0",
-    "doubles on a ground ball ": "ab_result=double, batted_type=groundball, play_type=battedball, outs_recorded=0",
-    "doubles on a hard ground ball ": "ab_result=double, batted_type=groundball, play_type=battedball, batted_strength=hard, outs_recorded=0",
-    "doubles on a line drive ": "ab_result=double, batted_type=linedrive, play_type=battedball, outs_recorded=0",
+    "doubles on a fly ball ": "ab_result=double, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a fly ball",
+    "doubles on a ground ball ": "ab_result=double, event_type=hit, batted_type=groundball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a ground ball",
+    "doubles on a hard ground ball ": "ab_result=double, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a hard ground ball",
+    "doubles on a line drive ": "ab_result=double, event_type=hit, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a line drive",
 
     # Triples
-    "triples on a fly ball ": "ab_result=triple, batted_type=flyball, play_type=battedball, outs_recorded=0",
-    "triples on a hard ground ball ": "ab_result=triple, batted_type=groundball, play_type=battedball, batted_strength=hard, outs_recorded=0",
-    "triples on a line drive ": "ab_result=triple, batted_type=linedrive, play_type=battedball, outs_recorded=0",
+    "triples on a fly ball ": "ab_result=triple, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=triples on a fly ball",
+    "triples on a hard ground ball ": "ab_result=triple, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=triples on a hard ground ball",
+    "triples on a line drive ": "ab_result=triple, event_type=hit, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=triples on a line drive",
 
     # Home Runs
-    "homers on a fly ball ": "ab_result=homerun, batted_type=flyball, play_type=battedball, outs_recorded=0",
-    "hits an inside the park home run on a fly ball ": "ab_result=homerun, batted_type=flyball, play_type=battedball, outs_recorded=0",
-    "hits an inside the park home run on a hard ground ball ": "ab_result=homerun, batted_type=groundball, play_type=battedball, batted_strength=hard, outs_recorded=0",
-
+    "homers on a fly ball ": "ab_result=homerun, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=homers on a fly ball",
+    "hits an inside the park home run on a fly ball ": "ab_result=homerun, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits an inside the park home run on a fly ball",
+    "hits an inside the park home run on a hard ground ball ": "ab_result=homerun, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits an inside the park home run on a hard ground ball",
+    
     # Walks / HBP
-    "walks ": "ab_result=walk, play_type=non_batted, outs_recorded=0",
-    "is hit by pitch ": "ab_result=hit_by_pitch, play_type=non_batted, outs_recorded=0"
+    "walks ": "ab_result=walk, event_type=walk, outs_recorded=0, is_pa=true, is_ab=false, ab_description=walks",
+    "is hit by pitch ": "ab_result=hit_by_pitch, event_type=hbp, outs_recorded=0, is_pa=true, is_ab=false, ab_description=is hit by pitch",
 
     # Reaches on Error
-    "hits a ground ball and reaches on an error ": "ab_result=reaches_on_error, batted_type=groundball, play_type=error, outs_recorded=0",
-    "hits a fly ball and reaches on an error ": "ab_result=reaches_on_error, batted_type=flyball, play_type=error, outs_recorded=0",
-    "hits a line drive and reaches on an error ": "ab_result=reaches_on_error, batted_type=linedrive, play_type=error, outs_recorded=0",
-    "hits a hard ground ball and reaches on an error ": "ab_result=reaches_on_error, batted_type=groundball, batted_strength=hard, play_type=error, outs_recorded=0",
-    "reaches on dropped 3rd strike (wild pitch) ": "ab_result=strikeout_dropped_third_strike, play_type=dropped_third_strike, pitch_type=wild_pitch, outs_recorded=0",
-    "reaches on dropped 3rd strike (passed ball) ": "ab_result=strikeout_dropped_third_strike, play_type=dropped_third_strike, pitch_type=passed_ball, outs_recorded=0"
+    "hits a ground ball and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=groundball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a ground ball and reaches on an error",
+    "hits a fly ball and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a fly ball and reaches on an error",
+    "hits a line drive and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a line drive and reaches on an error",
+    "hits a hard ground ball and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a hard ground ball and reaches on an error",
+    "reaches on dropped 3rd strike (wild pitch) ": "ab_result=strikeout_dropped_third_strike, event_type=strikeout, pitch_type=wild_pitch, outs_recorded=0, is_pa=true, is_ab=true, ab_description=reaches on dropped 3rd strike (wild pitch)",
+    "reaches on dropped 3rd strike (passed ball) ": "ab_result=strikeout_dropped_third_strike, event_type=strikeout, pitch_type=passed_ball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=reaches on dropped 3rd strike (passed ball)",
 
     # Strikeouts
-    "strikes out swinging ": "ab_result=strikeout_swinging, play_type=strikeout, outs_recorded=1",
-    "strikes out looking ": "ab_result=strikeout_looking, play_type=strikeout, outs_recorded=1",
-    "out at first on dropped 3rd strike ": "ab_result=strikeout_dropped_third, play_type=dropped_third_strike, outs_recorded=1",
+    "strikes out swinging ": "ab_result=strikeout_swinging, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=strikes out swinging",
+    "strikes out looking ": "ab_result=strikeout_looking, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=strikes out looking",
+    "out at first on dropped 3rd strike ": "ab_result=strikeout_dropped_third, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=out at first on dropped 3rd strike",
 
     # Outs
-    "grounds out ": "ab_result=groundout, batted_type=groundball, play_type=battedball, outs_recorded=1",
-    "flies out ": "ab_result=flyout, batted_type=flyball, play_type=battedball, outs_recorded=1",
-    "flies out in foul territory ": "ab_result=flyout, batted_type=flyball, play_type=battedball, foul=True, outs_recorded=1",
-    "lines out ": "ab_result=lineout, batted_type=linedrive, play_type=battedball, outs_recorded=1",
-    "pops out ": "ab_result=popout, batted_type=popup, play_type=battedball, outs_recorded=1",
-    "pops into a double play ": "ab_result=double_play, batted_type=popup, play_type=battedball, outs_recorded=2",
-    "out (other) ": "ab_result=out_other, play_type=fielded_play, outs_recorded=1",
-    "out on sacrifice fly ": "ab_result=sacrifice_fly, batted_type=flyball, play_type=sacrifice, outs_recorded=1",
-    "out on infield fly ": "ab_result=infield_fly, batted_type=popup, play_type=battedball, outs_recorded=1",
-    "is out on foul tip ": "ab_result=strikeout_foul_tip, play_type=strikeout, outs_recorded=1",
+    "grounds out ": "ab_result=groundout, event_type=out, batted_type=groundball, outs_recorded=1, is_pa=true, is_ab=true, ab_description=grounds out",
+    "flies out ": "ab_result=flyout, event_type=out, batted_type=flyball, outs_recorded=1, is_pa=true, is_ab=true, ab_description=flies out",
+    "flies out in foul territory ": "ab_result=flyout, event_type=out, batted_type=flyball, is_foul=true, outs_recorded=1, is_pa=true, is_ab=true, ab_description=flies out in foul territory",
+    "lines out ": "ab_result=lineout, event_type=out, batted_type=linedrive, outs_recorded=1, is_pa=true, is_ab=true, ab_description=lines out",
+    "pops out ": "ab_result=popout, event_type=out, batted_type=popup, outs_recorded=1, is_pa=true, is_ab=true, ab_description=pops out",
+    "pops into a double play ": "ab_result=double_play, event_type=out, batted_type=popup, outs_recorded=2, is_pa=true, is_ab=true, ab_description=pops into a double play",
+    "out (other) ": "ab_result=out_other, event_type=out, outs_recorded=1, is_pa=true, is_ab=true, ab_description=out (other)",
+    "out on sacrifice fly ": "ab_result=sacrifice_fly, event_type=sacrifice, batted_type=flyball, outs_recorded=1, is_pa=true, is_ab=false, ab_description=out on sacrifice fly",
+    "out on infield fly ": "ab_result=infield_fly, event_type=out, batted_type=popup, outs_recorded=1, is_pa=true, is_ab=true, ab_description=out on infield fly",
+    "is out on foul tip ": "ab_result=strikeout_foul_tip, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=is out on foul tip",
 
     # Double / Multiple Outs
-    "lines into a double play ": "ab_result=double_play, batted_type=linedrive, play_type=battedball, outs_recorded=2",
-    "grounds into a double play ": "ab_result=double_play, batted_type=groundball, play_type=battedball, outs_recorded=2",
-    "grounds into fielder's choice double play ": "ab_result=double_play, play_type=fielder_choice, batted_type=groundball, outs_recorded=2",
-    "grounds into fielder's choice ": "ab_result=fielder_choice, batted_type=groundball, play_type=fielder_choice, outs_recorded=1",
+    "lines into a double play ": "ab_result=double_play, event_type=out, batted_type=linedrive, outs_recorded=2, is_pa=true, is_ab=true, ab_description=lines into a double play",
+    "grounds into a double play ": "ab_result=double_play, event_type=out, batted_type=groundball, outs_recorded=2, is_pa=true, is_ab=true, ab_description=grounds into a double play",
+    "grounds into fielder's choice double play ": "ab_result=double_play, event_type=out, batted_type=groundball, outs_recorded=2, is_pa=true, is_ab=true, ab_description=grounds into fielder's choice double play",
+    "grounds into fielder's choice ": "ab_result=fielder_choice, event_type=out, batted_type=groundball, outs_recorded=1, is_pa=true, is_ab=true, ab_description=grounds into fielder's choice",
 
     # Misc
-    "sacrifices ": "ab_result=sacrifice_hit, play_type=sacrifice, outs_recorded=1",
+    "sacrifices ": "ab_result=sacrifice_bunt, event_type=sacrifice, batted_type=bunt, outs_recorded=1, is_pa=true, is_ab=false, ab_description=sacrifices",
 
     # Hit locations
     "to pitcher": "hit_loc=1",
