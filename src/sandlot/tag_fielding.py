@@ -4,8 +4,15 @@ import re
 
 # Human-readable position labels
 POSITIONS = {
-    "pitcher", "catcher", "first baseman", "second baseman", "third baseman",
-    "shortstop", "left fielder", "center fielder", "right fielder",
+    "pitcher",
+    "catcher",
+    "first baseman",
+    "second baseman",
+    "third baseman",
+    "shortstop",
+    "left fielder",
+    "center fielder",
+    "right fielder",
 }
 
 # MLB numeric position mapping
@@ -52,16 +59,20 @@ pattern_hit_loc = re.compile(
 
 # --- Tagging Functions ---
 
+
 def tag_hit_location_only(text: str) -> str:
     """Tag hit location (hit_loc=X) based on single position mentions like 'to shortstop'."""
+
     def replacer(match: re.Match) -> str:
         pos = match.group("pos")
         return f", hit_loc={POSITION_MAP[pos]}"
+
     return "\n".join(pattern_hit_loc.sub(replacer, line) for line in text.splitlines())
 
 
 def tag_fielding_sequence(text: str) -> str:
     """Tag fielding chains with hit_loc=X and fielder_sequence=1-3-6, etc."""
+
     def replacer(match: re.Match) -> str:
         raw = match.group("chain")
         fielders = re.findall(
@@ -74,6 +85,7 @@ def tag_fielding_sequence(text: str) -> str:
         hit_loc = POSITION_MAP[fielders[0]]
         fielder_seq = "-".join(POSITION_MAP[pos] for pos in fielders)
         return f", hit_loc={hit_loc}, fielder_sequence={fielder_seq}"
+
     return "\n".join(pattern_chain.sub(replacer, line) for line in text.splitlines())
 
 
@@ -86,10 +98,12 @@ def tag_all_fielding(text: str) -> str:
 
 def replace_fielding_chain(text: str) -> str:
     """Replace 'pos1 to pos2' fielding throw with fielding=X-Y style tag."""
+
     def repl(m: re.Match) -> str:
         p1 = POS_MAP[m.group("pos1")]
         p2 = POS_MAP[m.group("pos2")]
         return f"fielding={p1}-{p2}"
+
     return pattern_throw.sub(repl, text)
 
 
@@ -105,7 +119,4 @@ def fix_ab_raw_location_phrase(text: str) -> str:
         return f"{m.group(1)} to {m.group('pos')}{m.group(3)}"
 
     lines = text.splitlines()
-    return "\n".join(
-        pattern.sub(repl, line) if "ab_raw=" in line else line
-        for line in lines
-    )
+    return "\n".join(pattern.sub(repl, line) if "ab_raw=" in line else line for line in lines)

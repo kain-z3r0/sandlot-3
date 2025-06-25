@@ -4,6 +4,7 @@ from pathlib import Path
 
 import yaml
 
+
 def clean_tagged_line(text: str) -> str:
     """Clean a tagged line by removing all periods and normalizing spacing.
 
@@ -12,12 +13,11 @@ def clean_tagged_line(text: str) -> str:
     - Normalizes comma spacing
     - Collapses multiple spaces
     """
-    text = text.replace(".", "")               # remove all periods
-    text = re.sub(r"\s+,", ",", text)          # remove space before commas
-    text = re.sub(r",\s+", ", ", text)         # normalize comma spacing
-    text = re.sub(r"\s{2,}", " ", text)        # collapse extra spaces
+    text = text.replace(".", "")  # remove all periods
+    text = re.sub(r"\s+,", ",", text)  # remove space before commas
+    text = re.sub(r",\s+", ", ", text)  # normalize comma spacing
+    text = re.sub(r"\s{2,}", " ", text)  # collapse extra spaces
     return text.strip()
-
 
 
 @lru_cache(maxsize=1)
@@ -27,10 +27,7 @@ def load_event_phrase_map(filepath: str | Path = "ab_event_mapping.yaml") -> dic
     if not isinstance(raw, dict):
         raise ValueError(f"{filepath!r} must contain a top-level mapping")
 
-    flat = {
-        key: " ".join(val.splitlines()).strip().replace("  ", " ")
-        for key, val in raw.items()
-    }
+    flat = {key: " ".join(val.splitlines()).strip().replace("  ", " ") for key, val in raw.items()}
     return dict(sorted(flat.items(), key=lambda kv: len(kv[0]), reverse=True))
 
 

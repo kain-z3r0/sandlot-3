@@ -1,13 +1,12 @@
 from collections.abc import Callable
 from functools import partial
-from pathlib import Path
 from typing import TypedDict
 
 from pattern_handler import PatternHandler, compile_pattern
 from uid_generator import generate_uid
 
-
 # --- Data Contracts ---
+
 
 class Metadata(TypedDict):
     players: tuple[str, ...]
@@ -27,15 +26,18 @@ class MappedData(TypedDict, total=False):
 
 # --- Tagger Functions ---
 
+
 def tag_inning(line: str) -> str:
     """Convert inning description into a structured tag line."""
     half = PatternHandler("inning_half").search(line).group("half").lower()
     num = PatternHandler("inning_num").search(line).group("num")
     return f"entry=inning,half={half},number={num},"
 
+
 def tag_position(_: str) -> str:
     """Placeholder for future position tagging logic."""
     return ""
+
 
 def tag_filtered_line(_: str) -> str:
     """Stub tagger for filtered lines."""
@@ -55,6 +57,7 @@ tagger_registry: dict[str, Callable[[str], str] | None] = {
 
 # --- Mapping Logic ---
 
+
 def build_mapping(metadata: Metadata) -> MappedData:
     """Apply taggers to each metadata group to build a mapped data dictionary."""
     mapping: MappedData = {}
@@ -67,6 +70,7 @@ def build_mapping(metadata: Metadata) -> MappedData:
 
 
 # --- Replacement Logic ---
+
 
 def apply_tag_replacements(text: str, mapping: MappedData) -> str:
     """Apply compiled regex replacements using tag mappings."""

@@ -43,7 +43,9 @@ def tag_pitchers(text: str) -> str:
                 bottom_pitcher = pitcher
 
         # Apply pitcher tag if missing and line is an outcome
-        if line.startswith("entry=atbat_outcome") and not pattern_pitcher_already_tagged.search(line):
+        if line.startswith("entry=atbat_outcome") and not pattern_pitcher_already_tagged.search(
+            line
+        ):
             if current_half == "top":
                 line += f", pitcher={top_pitcher or 'unknown'}"
             elif current_half == "bottom":
