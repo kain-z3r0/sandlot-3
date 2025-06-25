@@ -196,7 +196,7 @@ def tag_outcome(text: str) -> str:
         if line.startswith("entry=atbat_outcome"):
             match = outcome_pattern.search(line)
             outcome = match.group("outcome").strip() if match is not None else "missing"
-            updated_line = line.replace(outcome, f", ab_result={outcome}")
+            updated_line = line.replace(outcome, f", ab_raw={outcome}")
             result.append(updated_line)
         else:
             result.append(line)
@@ -245,7 +245,7 @@ POSITIONS = {
 
 def get_outcome(text):
     lines = text.splitlines()
-    pattern = re.compile(r"ab_result=(?P<outcome>.*?)(?=,|player_)")
+    pattern = re.compile(r"ab_raw=(?P<outcome>.*?)(?=,|player_)")
 
     result = [
         match.group("outcome") for line in lines if (match := pattern.search(line))
@@ -254,117 +254,222 @@ def get_outcome(text):
     return set(result)
 
 
-grouped_phrases = {
-    # Singles
-    "singles on a bunt ": "ab_result=single, event_type=hit, batted_type=bunt, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a bunt",
-    "singles on a fly ball ": "ab_result=single, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a fly ball",
-    "singles on a ground ball ": "ab_result=single, event_type=hit, batted_type=groundball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a ground ball",
-    "singles on a hard ground ball ": "ab_result=single, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a hard ground ball",
-    "singles on a line drive ": "ab_result=single, event_type=hit, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a line drive",
-    "singles on a pop fly ": "ab_result=single, event_type=hit, batted_type=popup, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a pop fly",
+# *** Collision-safe mapping ***
+# Keys are automatically ordered from longest to shortest, so substring
+# collisions (e.g. “grounds into fielder’s choice ” vs
+# “grounds into fielder’s choice double play ”) cannot occur.
+grouped_phrases = dict(
+    sorted(
+        {
+            # Singles
+            "singles on a hard ground ball ": "ab_result=single, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a hard ground ball",
+            "singles on a ground ball ": "ab_result=single, event_type=hit, batted_type=groundball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a ground ball",
+            "singles on a fly ball ": "ab_result=single, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a fly ball",
+            "singles on a line drive ": "ab_result=single, event_type=hit, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a line drive",
+            "singles on a pop fly ": "ab_result=single, event_type=hit, batted_type=popup, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a pop fly",
+            "singles on a bunt ": "ab_result=single, event_type=hit, batted_type=bunt, outs_recorded=0, is_pa=true, is_ab=true, ab_description=singles on a bunt",
 
-    # Doubles
-    "doubles on a fly ball ": "ab_result=double, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a fly ball",
-    "doubles on a ground ball ": "ab_result=double, event_type=hit, batted_type=groundball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a ground ball",
-    "doubles on a hard ground ball ": "ab_result=double, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a hard ground ball",
-    "doubles on a line drive ": "ab_result=double, event_type=hit, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a line drive",
+            # Doubles
+            "doubles on a hard ground ball ": "ab_result=double, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a hard ground ball",
+            "doubles on a ground ball ": "ab_result=double, event_type=hit, batted_type=groundball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a ground ball",
+            "doubles on a fly ball ": "ab_result=double, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a fly ball",
+            "doubles on a line drive ": "ab_result=double, event_type=hit, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=doubles on a line drive",
 
-    # Triples
-    "triples on a fly ball ": "ab_result=triple, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=triples on a fly ball",
-    "triples on a hard ground ball ": "ab_result=triple, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=triples on a hard ground ball",
-    "triples on a line drive ": "ab_result=triple, event_type=hit, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=triples on a line drive",
+            # Triples
+            "triples on a hard ground ball ": "ab_result=triple, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=triples on a hard ground ball",
+            "triples on a fly ball ": "ab_result=triple, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=triples on a fly ball",
+            "triples on a line drive ": "ab_result=triple, event_type=hit, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=triples on a line drive",
 
-    # Home Runs
-    "homers on a fly ball ": "ab_result=homerun, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=homers on a fly ball",
-    "hits an inside the park home run on a fly ball ": "ab_result=homerun, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits an inside the park home run on a fly ball",
-    "hits an inside the park home run on a hard ground ball ": "ab_result=homerun, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits an inside the park home run on a hard ground ball",
-    
-    # Walks / HBP
-    "walks ": "ab_result=walk, event_type=walk, outs_recorded=0, is_pa=true, is_ab=false, ab_description=walks",
-    "is hit by pitch ": "ab_result=hit_by_pitch, event_type=hbp, outs_recorded=0, is_pa=true, is_ab=false, ab_description=is hit by pitch",
+            # Home runs
+            "hits an inside the park home run on a hard ground ball ": "ab_result=homerun, event_type=hit, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits an inside the park home run on a hard ground ball",
+            "hits an inside the park home run on a fly ball ": "ab_result=homerun, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits an inside the park home run on a fly ball",
+            "homers on a fly ball ": "ab_result=homerun, event_type=hit, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=homers on a fly ball",
 
-    # Reaches on Error
-    "hits a ground ball and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=groundball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a ground ball and reaches on an error",
-    "hits a fly ball and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a fly ball and reaches on an error",
-    "hits a line drive and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a line drive and reaches on an error",
-    "hits a hard ground ball and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a hard ground ball and reaches on an error",
-    "reaches on dropped 3rd strike (wild pitch) ": "ab_result=strikeout_dropped_third_strike, event_type=strikeout, pitch_type=wild_pitch, outs_recorded=0, is_pa=true, is_ab=true, ab_description=reaches on dropped 3rd strike (wild pitch)",
-    "reaches on dropped 3rd strike (passed ball) ": "ab_result=strikeout_dropped_third_strike, event_type=strikeout, pitch_type=passed_ball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=reaches on dropped 3rd strike (passed ball)",
+            # Walk / HBP
+            "is hit by pitch ": "ab_result=hit_by_pitch, event_type=hbp, outs_recorded=0, is_pa=true, is_ab=false, ab_description=is hit by pitch",
+            "walks ": "ab_result=walk, event_type=walk, outs_recorded=0, is_pa=true, is_ab=false, ab_description=walks",
 
-    # Strikeouts
-    "strikes out swinging ": "ab_result=strikeout_swinging, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=strikes out swinging",
-    "strikes out looking ": "ab_result=strikeout_looking, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=strikes out looking",
-    "out at first on dropped 3rd strike ": "ab_result=strikeout_dropped_third, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=out at first on dropped 3rd strike",
+            # Reaches on error
+            "hits a hard ground ball and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=groundball, contact_quality=hard, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a hard ground ball and reaches on an error",
+            "hits a ground ball and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=groundball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a ground ball and reaches on an error",
+            "hits a line drive and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=linedrive, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a line drive and reaches on an error",
+            "hits a fly ball and reaches on an error ": "ab_result=reaches_on_error, event_type=error, batted_type=flyball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=hits a fly ball and reaches on an error",
 
-    # Outs
-    "grounds out ": "ab_result=groundout, event_type=out, batted_type=groundball, outs_recorded=1, is_pa=true, is_ab=true, ab_description=grounds out",
-    "flies out ": "ab_result=flyout, event_type=out, batted_type=flyball, outs_recorded=1, is_pa=true, is_ab=true, ab_description=flies out",
-    "flies out in foul territory ": "ab_result=flyout, event_type=out, batted_type=flyball, is_foul=true, outs_recorded=1, is_pa=true, is_ab=true, ab_description=flies out in foul territory",
-    "lines out ": "ab_result=lineout, event_type=out, batted_type=linedrive, outs_recorded=1, is_pa=true, is_ab=true, ab_description=lines out",
-    "pops out ": "ab_result=popout, event_type=out, batted_type=popup, outs_recorded=1, is_pa=true, is_ab=true, ab_description=pops out",
-    "pops into a double play ": "ab_result=double_play, event_type=out, batted_type=popup, outs_recorded=2, is_pa=true, is_ab=true, ab_description=pops into a double play",
-    "out (other) ": "ab_result=out_other, event_type=out, outs_recorded=1, is_pa=true, is_ab=true, ab_description=out (other)",
-    "out on sacrifice fly ": "ab_result=sacrifice_fly, event_type=sacrifice, batted_type=flyball, outs_recorded=1, is_pa=true, is_ab=false, ab_description=out on sacrifice fly",
-    "out on infield fly ": "ab_result=infield_fly, event_type=out, batted_type=popup, outs_recorded=1, is_pa=true, is_ab=true, ab_description=out on infield fly",
-    "is out on foul tip ": "ab_result=strikeout_foul_tip, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=is out on foul tip",
+            # Dropped‐third strikes where batter reaches
+            "reaches on dropped 3rd strike (passed ball) ": "ab_result=strikeout_dropped_third_strike, event_type=strikeout, pitch_type=passed_ball, outs_recorded=0, is_pa=true, is_ab=true, ab_description=reaches on dropped 3rd strike (passed ball)",
+            "reaches on dropped 3rd strike (wild pitch) ": "ab_result=strikeout_dropped_third_strike, event_type=strikeout, pitch_type=wild_pitch, outs_recorded=0, is_pa=true, is_ab=true, ab_description=reaches on dropped 3rd strike (wild pitch)",
 
-    # Double / Multiple Outs
-    "lines into a double play ": "ab_result=double_play, event_type=out, batted_type=linedrive, outs_recorded=2, is_pa=true, is_ab=true, ab_description=lines into a double play",
-    "grounds into a double play ": "ab_result=double_play, event_type=out, batted_type=groundball, outs_recorded=2, is_pa=true, is_ab=true, ab_description=grounds into a double play",
-    "grounds into fielder's choice double play ": "ab_result=double_play, event_type=out, batted_type=groundball, outs_recorded=2, is_pa=true, is_ab=true, ab_description=grounds into fielder's choice double play",
-    "grounds into fielder's choice ": "ab_result=fielder_choice, event_type=out, batted_type=groundball, outs_recorded=1, is_pa=true, is_ab=true, ab_description=grounds into fielder's choice",
+            # Strikeouts
+            "strikes out swinging ": "ab_result=strikeout_swinging, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=strikes out swinging",
+            "strikes out looking ": "ab_result=strikeout_looking, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=strikes out looking",
+            "out at first on dropped 3rd strike ": "ab_result=strikeout_dropped_third, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=out at first on dropped 3rd strike",
+            "is out on foul tip ": "ab_result=strikeout_foul_tip, event_type=strikeout, outs_recorded=1, is_pa=true, is_ab=true, ab_description=is out on foul tip",
 
-    # Misc
-    "sacrifices ": "ab_result=sacrifice_bunt, event_type=sacrifice, batted_type=bunt, outs_recorded=1, is_pa=true, is_ab=false, ab_description=sacrifices",
+            # Outs – more specific first
+            "flies out in foul territory ": "ab_result=flyout, event_type=out, batted_type=flyball, in_play=foul, outs_recorded=1, is_pa=true, is_ab=true, ab_description=flies out in foul territory",
+            "pops into a double play ": "ab_result=double_play, event_type=out, batted_type=popup, outs_recorded=2, is_pa=true, is_ab=true, ab_description=pops into a double play",
+            "grounds into fielder's choice double play ": "ab_result=double_play, event_type=out, batted_type=groundball, outs_recorded=2, is_pa=true, is_ab=true, ab_description=grounds into fielder's choice double play",
+            "grounds into a double play ": "ab_result=double_play, event_type=out, batted_type=groundball, outs_recorded=2, is_pa=true, is_ab=true, ab_description=grounds into a double play",
+            "lines into a double play ": "ab_result=double_play, event_type=out, batted_type=linedrive, outs_recorded=2, is_pa=true, is_ab=true, ab_description=lines into a double play",
+            "grounds into fielder's choice ": "ab_result=fielder_choice, event_type=out, batted_type=groundball, outs_recorded=1, is_pa=true, is_ab=true, ab_description=grounds into fielder's choice",
+            "out on sacrifice fly ": "ab_result=sacrifice_fly, event_type=sacrifice, batted_type=flyball, outs_recorded=1, is_pa=true, is_ab=false, ab_description=out on sacrifice fly",
+            "out on infield fly ": "ab_result=infield_fly, event_type=out, batted_type=popup, outs_recorded=1, is_pa=true, is_ab=true, ab_description=out on infield fly",
+            "grounds out ": "ab_result=groundout, event_type=out, batted_type=groundball, outs_recorded=1, is_pa=true, is_ab=true, ab_description=grounds out",
+            "flies out ": "ab_result=flyout, event_type=out, batted_type=flyball, outs_recorded=1, is_pa=true, is_ab=true, ab_description=flies out",
+            "lines out ": "ab_result=lineout, event_type=out, batted_type=linedrive, outs_recorded=1, is_pa=true, is_ab=true, ab_description=lines out",
+            "pops out ": "ab_result=popout, event_type=out, batted_type=popup, outs_recorded=1, is_pa=true, is_ab=true, ab_description=pops out",
+            "out (other) ": "ab_result=out_other, event_type=out, outs_recorded=1, is_pa=true, is_ab=true, ab_description=out (other)",
 
-    # Hit locations
-    "to pitcher": "hit_loc=1",
-    "by pitcher": "hit_loc=1",
-    "to catcher": "hit_loc=2",
-    "by catcher": "hit_loc=2",
-    "to first baseman": "hit_loc=3",
-    "by first baseman": "hit_loc=3",
-    "to second baseman": "hit_loc=4",
-    "by second baseman": "hit_loc=4",
-    "to third baseman": "hit_loc=5",
-    "by third baseman": "hit_loc=5",
-    "to shortstop": "hit_loc=6",
-    "by shortstop": "hit_loc=6",
-    "to left fielder": "hit_loc=7",
-    "by left fielder": "hit_loc=7",
-    "to center fielder": "hit_loc=8",
-    "by center fielder": "hit_loc=8",
-    "to right fielder": "hit_loc=9",
-    "by right fielder": "hit_loc=9"
-}
+            # Sacrifice bunt (generic “sacrifices ” wording)
+            "sacrifices ": "ab_result=sacrifice_bunt, event_type=sacrifice, batted_type=bunt, outs_recorded=1, is_pa=true, is_ab=false, ab_description=sacrifices",
 
-
-
-
-def fix_location_formatting(text):
-    pattern = re.compile(
-        r"(ab_result=[^,]+), "
-        r"((?:pitcher|catcher|first baseman|second baseman|third baseman|"
-        r"shortstop|left fielder|center fielder|right fielder))([^,.]*)"
+            # Hit-location tags (no collision risk but included for completeness)
+            "by center fielder": "hit_loc=8",
+            "to center fielder": "hit_loc=8",
+            "by right fielder": "hit_loc=9",
+            "to right fielder": "hit_loc=9",
+            "by left fielder": "hit_loc=7",
+            "to left fielder": "hit_loc=7",
+            "by shortstop": "hit_loc=6",
+            "to shortstop": "hit_loc=6",
+            "by third baseman": "hit_loc=5",
+            "to third baseman": "hit_loc=5",
+            "by second baseman": "hit_loc=4",
+            "to second baseman": "hit_loc=4",
+            "by first baseman": "hit_loc=3",
+            "to first baseman": "hit_loc=3",
+            "by catcher": "hit_loc=2",
+            "to catcher": "hit_loc=2",
+            "by pitcher": "hit_loc=1",
+            "to pitcher": "hit_loc=1",
+        }.items(),
+        key=lambda kv: len(kv[0]),
+        reverse=True
     )
+)
 
-    result = []
+
+import re
+from pathlib import Path
+import yaml
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def load_ab_event_map(fp: str | Path = "ab_event_mapping.yaml") -> dict[str, str]:
+    raw = yaml.safe_load(Path(fp).read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError(f"{fp!r} must contain a top-level mapping")
+
+    # Flatten multiline replacements
+    flat = {
+        k: " ".join(v.splitlines()).strip().replace("  ", " ")
+        for k, v in raw.items()
+    }
+
+    return dict(sorted(flat.items(), key=lambda kv: len(kv[0]), reverse=True))
+
+
+# def tag_ab_events(text: str) -> str:
+#     mapping = load_ab_event_map()
+#     updated_lines = []
+
+#     for line in text.splitlines():
+#         for phrase, replacement in mapping.items():
+#             if phrase in line:
+#                 line = line.replace(phrase, replacement)
+#         updated_lines.append(line)
+#     return "\n".join(updated_lines)
+
+def clean_spacing(text: str) -> str:
+    text = re.sub(r'\s+,', ',', text)       # remove space before commas
+    text = re.sub(r',\s+', ', ', text)      # normalize comma spacing
+    text = re.sub(r'\s{2,}', ' ', text)     # collapse multiple spaces
+    return text.strip()
+
+import re
+
+def tag_ab_events(text: str) -> str:
+    mapping = load_ab_event_map()
+    out_lines = []
 
     for line in text.splitlines():
-        if line.startswith("entry=atbat") and (match := pattern.search(line)):
-            result.append(f"{match.group(1)} to {match.group(2)}")
-            # print(f"Full match: {match.group(0)}")
-            # print(f"Modified: {match.group(1)} to {match.group(2)}")
-        else:
-            result.append(line)
+        if "ab_raw=" not in line:
+            out_lines.append(clean_spacing(line))
+            continue
 
-    return "\n".join(result)
+        # Extract ab_raw value
+        match = re.search(r"ab_raw=([^,]+)", line)
+        if not match:
+            out_lines.append(clean_spacing(line))
+            continue
+
+        raw_val = match.group(1).strip()
+
+        # Replace using mapping
+        tagged = raw_val
+        for phrase, replacement in mapping.items():
+            if phrase in tagged:
+                tagged = tagged.replace(phrase, replacement + " ")
+
+        # Remove ab_raw=... from the line
+        line = re.sub(r",?\s*ab_raw=[^,]+", "", line)
+
+        # Insert tagged data at end
+        line = f"{line}, {clean_spacing(tagged)}"
+        out_lines.append(clean_spacing(line))
+
+    return "\n".join(out_lines)
+
+
+
+
+
+
+def fix_location_formatting(text: str) -> str:
+    pattern = re.compile(
+        r"(ab_raw=[^,]+),\s*"
+        r"(?P<pos>pitcher|catcher|first baseman|second baseman|"
+        r"third baseman|shortstop|left fielder|center fielder|right fielder)"
+        r"([^.,]*)"
+    )
+
+    def repl(m: re.Match) -> str:
+        return f"{m.group(1)} to {m.group('pos')}{m.group(3)}"
+
+    lines = text.splitlines()
+    out = []
+    for line in lines:
+        # only run on lines with raw, unprocessed event description
+        if "ab_raw=" in line:
+            line = pattern.sub(repl, line)
+        out.append(line)
+
+    return "\n".join(out)
 
 
 def find_single(text):
     pattern = re.compile(r"singles on a fly ball(?! to)")
     matches = [line for line in text.splitlines() if pattern.search(line)]
     return set(matches)
+
+
+POS_MAP = {
+    "pitcher": "1", "catcher": "2", "first baseman": "3",
+    "second baseman": "4", "third baseman": "5", "shortstop": "6",
+    "left fielder": "7", "center fielder": "8", "right fielder": "9"
+}
+
+pattern_field = re.compile(
+    r"\b(?P<pos1>pitcher|catcher|first baseman|second baseman|third baseman|shortstop|left fielder|center fielder|right fielder) player_\w+ to (?P<pos2>pitcher|catcher|first baseman|second baseman|third baseman|shortstop|left fielder|center fielder|right fielder) player_\w+"
+)
+
+def replace_fielding(text: str) -> str:
+    def repl(m):
+        p1 = POS_MAP[m.group("pos1")]
+        p2 = POS_MAP[m.group("pos2")]
+        return f"fielding={p1}-{p2}"
+    
+    return pattern_field.sub(repl, text)
 
 
 def main():
@@ -388,6 +493,9 @@ def main():
     # out = get_outcome(d)
 
     h = fix_location_formatting(d)
+    #j = replace_fielding(h)
+    ii = tag_ab_events(h)
+    print(ii)
     # print(h)
     # for o in out:
     #     print(o)
