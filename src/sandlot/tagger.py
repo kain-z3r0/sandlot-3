@@ -567,6 +567,72 @@ def replace_fielding(text: str) -> str:
     
     return pattern_field.sub(repl, text)
 
+import re
+
+# MLB position number mapping
+POSITION_MAP = {
+    "pitcher": "1",
+    "catcher": "2",
+    "first baseman": "3",
+    "second baseman": "4",
+    "third baseman": "5",
+    "shortstop": "6",
+    "left fielder": "7",
+    "center fielder": "8",
+    "right fielder": "9"
+}
+
+# ----------- Hit Location Only -----------
+
+# Matches: "to shortstop player_xxxxxx" → hit location only (not a throw)
+hit_loc_pattern = re.compile(
+    r" to (?P<pos>pitcher|catcher|first baseman|second baseman|third baseman|shortstop|left fielder|center fielder|right fielder)"
+    r"(?: player_\w{7})?"
+)
+
+def tag_hit_location_only(text: str) -> str:
+    def replacer(match):
+        pos = match.group("pos")
+        return f", hit_loc={POSITION_MAP[pos]}"
+    return "\n".join(hit_loc_pattern.sub(replacer, line) for line in text.splitlines())
+
+
+# ----------- Fielder Sequence -----------
+
+# Matches fielder throw chains: "shortstop to first baseman"
+field_pattern = re.compile(
+    r", (?P<chain>(?:(?:pitcher|catcher|first baseman|second baseman|third baseman|shortstop|left fielder|center fielder|right fielder)"
+    r"(?: player_\w{7})? to )+"
+    r"(?:pitcher|catcher|first baseman|second baseman|third baseman|shortstop|left fielder|center fielder|right fielder)"
+    r"(?: player_\w{7})?)"
+)
+
+def tag_fielding_sequence(text: str) -> str:
+    def replacer(match):
+        raw = match.group("chain")
+        fielders = re.findall(
+            r"(pitcher|catcher|first baseman|second baseman|third baseman|shortstop|left fielder|center fielder|right fielder)",
+            raw
+        )
+        if not fielders:
+            return match.group(0)
+        hit_loc = POSITION_MAP[fielders[0]]
+        fielder_seq = "-".join(POSITION_MAP[f] for f in fielders)
+        return f", hit_loc={hit_loc}, fielder_sequence={fielder_seq}"
+    return "\n".join(field_pattern.sub(replacer, line) for line in text.splitlines())
+
+
+# ----------- Combo Wrapper (optional) -----------
+
+def tag_all_fielding(text: str) -> str:
+    text = tag_fielding_sequence(text)
+    text = tag_hit_location_only(text)
+    return text
+
+
+
+
+
 
 def main():
     filepath = Path(__file__).resolve().parents[2] / "simple_sample.txt"
@@ -589,10 +655,11 @@ def main():
     d = in_play(c)
     # pos = find_positions(d)
     # out = get_outcome(d)
-    h = fix_location_formatting(d)
+    h = tag_all_fielding(d)
+    #h = fix_location_formatting(d)
     #j = replace_fielding(h)
     ii = tag_ab_events(h)
-    print(y)
+    print(ii)
 
     # print(h)
     # for o in out:
