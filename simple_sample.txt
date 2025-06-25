@@ -202,9 +202,6 @@ Strikeout
 2 Outs
 Strike 1 swinging, Ball 1, Foul, Ball 2, Foul, Strike 3 swinging.
 O B strikes out swinging, A Gutwein pitching, M W remains at 3rd, R S remains at 2nd, B E remains at 1st.
+Single|3 Outs
+Ball 1, In play.
 M Clark singles on a fly ball, right fielder A Avitia to shortstop J Garcia-Lopez, M Clark out advancing to 2nd.
-R Schmidt singles on a fly ball, right fielder N Barajas to pitcher A Avitia, Z Egger out advancing to 2nd, B Esperum scores, R Roberts advances to 3rd.
-S Z singles on a fly ball, right fielder N Barajas to pitcher C Farmer, S Z advances to 2nd on error by pitcher C Farmer.
-D V singles on a fly ball, center fielder N Barajas to third baseman J Brooks, E S out advancing to 3rd, I M scores, D K advances to 2nd.
-C Farmer singles on a fly ball, right fielder B H to pitcher C J, C Farmer advances to 3rd on error by pitcher C J, C Farmer scores on error by pitcher C J.
-Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Lineup changed: B P in at pitcher, Ball 1, Foul, In play.
