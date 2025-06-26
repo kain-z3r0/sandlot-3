@@ -9,6 +9,8 @@ from tag_abid import insert_abids
 from tag_batting import tag_ab_raw_outcome, tag_batted_ball_flag, tag_batter_id, tag_pitch_count
 from tag_fielding import tag_all_fielding
 from tag_pitching import tag_pitchers
+from tag_baserunning import tag_baserunning_events 
+from base_state_engine import compute_baseout_states
 
 # TODO: Detect and handle cases where a player reaches first base on a clean single,
 #       then advances to additional bases due to a fielding error or misplay.
@@ -34,7 +36,10 @@ def run_pipeline(raw_text: str) -> str:
     text = tag_all_fielding(text)
     text = replace_ab_raw_events(text)
 
-    return text
+    text = tag_baserunning_events(text)
+    snapshots = compute_baseout_states(text.splitlines())
+
+    return text, snapshots
 
 
 def main():
@@ -49,8 +54,17 @@ def main():
     input_path = base_dir / sample_file
     raw_text = input_path.read_text()
 
-    result = run_pipeline(raw_text)
-    print(result)
+    tagged_log, snaps = run_pipeline(raw_text)
+
+    # show full tagged log
+    print(tagged_log)
+
+    # pretty base-out summary
+    print("\n=== BASE–OUT SNAPSHOTS ===")
+    for s in snaps:
+        print(f"ABID {s['abid']}   "
+              f"{s['before_bases']} {s['before_outs']} outs  →  "
+              f"{s['after_bases']} {s['after_outs']} outs")
 
 
 if __name__ == "__main__":
