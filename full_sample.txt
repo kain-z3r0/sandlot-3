@@ -2722,7 +2722,7 @@ Hit By Pitch
 Ball 1, J Martinez advances to 3rd on wild pitch, Foul, Ball 2.
 G Francis is hit by pitch, A E pitching, J Martinez remains at 3rd.
 Double|ITZ9 6 - JGBD 7
-G Francis advances to 1st, G Francis advances to 2nd on error by pitcher A C, J Martinez scores on the same error, G Francis advances to 3rd on the same error, Ball 1, Ball 2, G Francis scores on passed ball, Ball 3, In play.
+G Francis advances to 2nd on error by pitcher A C, J Martinez scores on the same error, G Francis advances to 3rd on the same error, Ball 1, Ball 2, G Francis scores on passed ball, Ball 3, In play.
 C Farmer doubles on a line drive to left fielder D F.
 Walk
 Ball 1, Foul, Ball 2, C Farmer steals 3rd, Ball 3, Foul, Ball 4.
